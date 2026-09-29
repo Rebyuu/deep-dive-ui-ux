@@ -93,7 +93,7 @@ def main():
 
     def sev(x):
         v = (x or "").lower()
-        return f'<b class="sev {esc(v)}">{esc(x if v != "good" else "gut")}</b>'
+        return f'<b class="sev {esc(v)}">{esc(x) if v != "good" else "⟦good⟧"}</b>'
 
     counts = {"P0": 0, "P1": 0, "P2": 0, "P3": 0}
     for c in crit.values():
@@ -102,9 +102,9 @@ def main():
                 counts[i["severity"]] += 1
     for g in s["goals"]:
         for st in g["steps"]:
-            f = st.get("finding")
-            if f and f["severity"] in counts:
-                counts[f["severity"]] += 1
+            for f in st.get("findings") or ([st["finding"]] if st.get("finding") else []):
+                if f["severity"] in counts:
+                    counts[f["severity"]] += 1
 
     # ---- goals as storyboards --------------------------------------------
     rows, goals_html = [], []
@@ -112,7 +112,7 @@ def main():
         n_total = sum(1 for x in g["steps"] if x["counts"])
         ideal = g.get("ideal")
         rows.append(f'<tr><td><a href="#g-{esc(g["id"])}">{esc(g["id"])}</a></td><td>{esc(g["title"])}</td>'
-                    f'<td class="num">{n_total}</td><td class="num">{esc(ideal) if ideal else "–"}</td><td>{esc(g.get("verdict",""))}</td></tr>')
+                    f'<td class="num">{n_total}</td><td class="num">{esc(ideal) if ideal is not None else "–"}</td><td>{esc(g.get("verdict",""))}</td></tr>')
         cards, running = [], 0
         for st in g["steps"]:
             if st["counts"]:
@@ -126,8 +126,9 @@ def main():
                     mark += (f'<svg class="arrow" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="{l:.2f}" y1="{t:.2f}" '
                              f'x2="{l2:.2f}" y2="{t2:.2f}" vector-effect="non-scaling-stroke"/></svg>'
                              f'<span class="mark end" style="left:{l2:.2f}%;top:{t2:.2f}%"></span>')
-            f = st.get("finding")
-            find = f'<p class="finding">{sev(f["severity"])} {link_ids(f["text"])}</p>' if f else ""
+            fs = st.get("findings") or ([st["finding"]] if st.get("finding") else [])
+            f = bool(fs)
+            find = "".join(f'<p class="finding">{sev(x["severity"])} {link_ids(x["text"])}</p>' for x in fs)
             note = f'<p class="stnote">{link_ids(st["note"])}</p>' if st.get("note") else ""
             counter = f'<span class="count">{running}</span>' if st["counts"] else '<span class="count off" title="⟦not counted⟧">–</span>'
             src = img.get(st["screen"])
@@ -140,7 +141,7 @@ def main():
   <p class="on"⟦>on <⟧a href="#s-{esc(st["screen"])}">{esc(st["screen"])}</a></p></div></li>''')
         goals_html.append(f'''<section class="goal" id="g-{esc(g["id"])}">
   <header><h3><span class="gid">{esc(g["id"])}</span>{esc(g["title"])}</h3>
-  <p class="meta"><span class="pill">{n_total} ⟦interactions⟧</span>{f'<span class="pill">ideal {esc(ideal)}</span>' if ideal else ''}</p></header>
+  <p class="meta"><span class="pill">{n_total} ⟦interactions⟧</span>{f'<span class="pill">ideal {esc(ideal)}</span>' if ideal is not None else ''}</p></header>
   {f'<p class="intent">{esc(g["intent"])}</p>' if g.get("intent") else ''}
   <ol class="board">{"".join(cards)}</ol>
   {f'<p class="verdict">{link_ids(g["verdict"])}</p>' if g.get("verdict") else ''}
@@ -230,6 +231,7 @@ def main():
 
 # Page chrome in German (--lang de). English is the source; longer phrases first.
 DE = [
+    ('good', 'gut'),
     ('Each workflow is a storyboard: every card shows the screen the step happened on, with a numbered marker where the tap landed. Every interaction except typing text is counted. Every workflow, screen and rule has room for your notes; they save in this browser and export as Markdown.', 'Jeder Ablauf ist ein Storyboard: jede Karte zeigt den Screen, auf dem der Schritt passierte, mit einer nummerierten Markierung an der Stelle des Tipps. Gezählt wird jede Interaktion außer Texteingabe. Unter jedem Ablauf, Screen und jeder Regel ist Platz für deine Notizen; sie speichern im Browser und lassen sich als Markdown exportieren.'),
     ('Click a card to jump to that screen\'s critique; its "Used in" line leads back.', 'Klick auf eine Karte springt zur Kritik des Screens; dort führt „Verwendet in" zurück.'),
     ('Browser storage unavailable, please export', 'Browser-Speicher nicht verfügbar – bitte exportieren'),

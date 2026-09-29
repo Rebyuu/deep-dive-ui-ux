@@ -5,12 +5,12 @@ Every workflow step points at the screenshot it happened on and the tap
 coordinates, so the report can show each goal as a storyboard.
 
 Commands:
-  init    <dir> --app NAME --device NAME --width W --height H [--build B]
+  init    <dir> --app NAME --device NAME --width W --height H [--build B] [--date YYYY-MM-DD]
   cluster <dir> ID NAME [--about TEXT]
   shot    <dir> SCREEN_ID [--file PNG] [--title T] [--cluster C]
   goal    <dir> GOAL_ID TITLE [--intent TEXT]
   step    <dir> GOAL_ID --screen SCREEN_ID --action ACTION [--x X --y Y] [--x2 X --y2 Y]
-          [--label L] [--note N] [--finding SEV TEXT] [--no-count]
+          [--label L] [--note N] [--finding SEV TEXT]... [--no-count]
   close   <dir> GOAL_ID [--verdict TEXT] [--ideal N]
   caveat  <dir> TEXT
   status  <dir>
@@ -60,6 +60,7 @@ def main():
     a.add_argument("--device", required=True); a.add_argument("--width", type=float, required=True)
     a.add_argument("--height", type=float, required=True); a.add_argument("--build", default="")
     a.add_argument("--udid", default="", help="iOS simulator UDID used by `shot`")
+    a.add_argument("--date", default="", help="session date, defaults to today")
 
     a = sub.add_parser("cluster"); a.add_argument("dir"); a.add_argument("id"); a.add_argument("name")
     a.add_argument("--about", default="")
@@ -75,7 +76,8 @@ def main():
     for k in ("x", "y", "x2", "y2"):
         a.add_argument("--" + k, type=float)
     a.add_argument("--label", default=""); a.add_argument("--note", default="")
-    a.add_argument("--finding", nargs=2, metavar=("SEV", "TEXT"))
+    a.add_argument("--finding", nargs=2, metavar=("SEV", "TEXT"), action="append",
+                   help="repeatable: one step can carry several findings")
     a.add_argument("--no-count", action="store_true")
 
     a = sub.add_parser("close"); a.add_argument("dir"); a.add_argument("goal")
@@ -93,7 +95,7 @@ def main():
         if os.path.exists(path(d)):
             die("session.json already exists")
         save(d, {"app": o.app, "device": o.device, "width": o.width, "height": o.height, "build": o.build,
-                 "udid": o.udid, "date": datetime.date.today().isoformat(), "caveats": [],
+                 "udid": o.udid, "date": o.date or datetime.date.today().isoformat(), "caveats": [],
                  "clusters": [], "screens": [], "goals": []})
         print("initialised", path(d)); return
 
@@ -132,11 +134,10 @@ def main():
             v = getattr(o, k)
             if v is not None:
                 st[k] = v
-        if o.finding:
-            sev, text = o.finding
+        for sev, text in o.finding or []:
             if sev not in SEVERITIES:
                 die(f"severity must be one of {sorted(SEVERITIES)}")
-            st["finding"] = {"severity": sev, "text": text}
+            st.setdefault("findings", []).append({"severity": sev, "text": text})
         g["steps"].append(st)
         n = sum(1 for x in g["steps"] if x["counts"])
         print(f"{o.goal} step {st['n']} logged ({n} interactions so far)")
