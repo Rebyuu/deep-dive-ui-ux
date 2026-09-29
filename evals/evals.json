@@ -1,0 +1,8 @@
+{
+  "skill_name": "deep-dive-ui-ux",
+  "evals": [
+    {"id": 1, "prompt": "My iOS app for tracking gym workouts is running in the simulator. Walk through it like a new user: create a routine, log a workout, edit and delete an exercise. Count the taps and tell me where the UI is inconsistent.", "expected_output": "Session with goals logged step by step against screenshots, per-screen critiques, consistency rules and a storyboard report.", "files": []},
+    {"id": 2, "prompt": "Can you do a full UX audit of our web dashboard at http://localhost:3000 before we redesign it? I want every screen documented and a page where my team can leave comments per screen.", "expected_output": "Browser-driven deep dive with a fixed viewport, report with notes fields and exportable notes.", "files": []},
+    {"id": 3, "prompt": "We use real customer invoices in our Android app's test data. Please review the invoice flow end to end and count clicks, but nothing may leave this machine.", "expected_output": "Deep dive kept local (gitignored folder, no uploads, no hosted page), with the sensitivity stated to the user.", "files": []}
+  ]
+}
