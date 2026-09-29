@@ -43,7 +43,7 @@ This is the core loop. Do it for every interaction, in this order:
 2. **Act.** Tap, swipe, long-press, type.
 3. **Log the step immediately**, pointing at the screen you acted on and where:
    ```bash
-   python <skill>/scripts/session.py step <dir> <goal-id> --screen <screen-id> --action tap --x 201 --y 603 --label "Neues Projekt" [--no-count] [--finding P1 "…"] [--note "…"]
+   python <skill>/scripts/session.py step <dir> <goal-id> --screen <screen-id> --action tap --x 201 --y 603 --label "New project" [--no-count] [--finding P1 "…"] [--note "…"]
    ```
    `--action` is tap | long-press | swipe | type | drag | system. Typing text does not count as an interaction (`type` is logged with `--no-count` automatically). A tap only needed because of a test-tool problem gets `--no-count --note "tool"`. For swipes and drags pass `--x2 --y2`.
 4. When something noteworthy happens (confusion, a wrong turn, a silent data change, a good pattern), attach it to the step as `--finding <P0-P3|good> "<what and why>"`, not in a separate notebook. Findings live where they happened.
@@ -81,10 +81,10 @@ When all clusters are critiqued, spawn one agent with `references/consistency-br
 ## 5. Build the report
 
 ```bash
-python <skill>/scripts/build_report.py <dir> [--out <dir>/report] [--inline] [--lang de|en]
+python <skill>/scripts/build_report.py <dir> [--out <dir>/report] [--inline] [--lang en|de] [--storage-key KEY]
 ```
 
-Use `--inline` for one self-contained file (screenshots embedded) and `--lang` to match the owner's language (the default is German).
+The page is English by default; pass `--lang de` for a German page (translation covers the page's own labels; content stays as written). `--inline` makes one self-contained file with the screenshots embedded. When rebuilding a report the owner has already annotated, reuse its `--storage-key` and write to the same path so their notes reappear.
 
 It produces `index.html` with:
 

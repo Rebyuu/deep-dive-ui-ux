@@ -17,11 +17,11 @@ Claude drives your real app (an iOS simulator, an Android emulator or a web app 
 - **Consistency.** The proposed placement rules, the biggest inconsistencies, and an action-by-screen matrix.
 - **Your notes.** A notes field on every goal, screen and rule. They save in your browser, and *Export notes* gives you a Markdown file to hand back to Claude as the input for a UI/UX guideline or redesign.
 
-Page chrome is available in German and English.
+The page is in English; `--lang de` switches its labels to German (your content stays as written).
 
 ## Why storyboards
 
-The first version of this workflow produced a written log of each workflow and, separately, a gallery of screenshots. Readers had to match "tap 4: Umbenennen" to the right image in their head. This skill logs every step as data that points at its screenshot and tap coordinates, so the report can put them together.
+The first version of this workflow produced a written log of each workflow and, separately, a gallery of screenshots. Readers had to match "tap 4: Rename" to the right image in their head. This skill logs every step as data that points at its screenshot and tap coordinates, so the report can put them together.
 
 ## Install
 
@@ -49,7 +49,7 @@ references/driving.md         driving iOS / Android / web, coordinates, tool pit
 references/critique-brief.md  output contract for per-screen critique agents
 references/consistency-brief.md  output contract for the cross-screen analysis
 scripts/session.py            structured log: goals, screenshots, steps with tap points, findings
-scripts/build_report.py       builds the review page (--inline, --lang de|en)
+scripts/build_report.py       builds the review page (--inline, --lang en|de, --storage-key)
 evals/evals.json              test prompts for iterating on the skill
 ```
 
